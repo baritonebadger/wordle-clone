@@ -11,33 +11,6 @@ let drawGrid = function (container,gridSize){
     }
 }
 
-let toggleSquare = function (square){
-    if (square.style.backgroundColor){
-        square.style.removeProperty('background-color')
-    }else{
-        square.style.backgroundColor="#E8A87C";
-    }
-}
-
-/*let awaitInput = function (square){
-    //listen for inputs here and enter them on the grid
-    //add button to the side of each row with arrow to submit grid
-    //impliment check system for words
-}
-*/
-
-let addSquareListeners = function (gameContainer){
-    let square = gameContainer.querySelectorAll(".square");
-    square.forEach(element => {
-        element.addEventListener('mouseover', () => {
-            toggleSquare(element);
-        })
-        element.addEventListener('mouseleave', () => {
-            toggleSquare(element);
-        })
-    });
-}
-
 let displayTextOnSquare = function (key){
     if (allSquares[currentSquare]==undefined){
         return;
@@ -46,6 +19,7 @@ let displayTextOnSquare = function (key){
 }
 
 let isRoom = function (){
+    //change to currentSquare==gridsize?? 
     if (currentSquare==5)
         {
             return false;
@@ -54,8 +28,53 @@ let isRoom = function (){
         }
 }
 
-let gradeGuess = function(){
-    //check for matches in both arrays
+let checkExactPlace = function (guess){
+    for (let i=0; i<currentWordArray.length;i++){
+        if (guess[i]==currentWordArray[i]){
+            colorArray[i]="g";
+        }
+    }
+}
+
+let changeBackgroundColors = function (){
+    for (let i=0; i<currentWordArray.length;i++){
+        if (colorArray[i]=="y"){
+            allSquares[i].style.backgroundColor="yellow";
+        }else if (colorArray[i]=="g"){
+            allSquares[i].style.backgroundColor="green";
+        }else if (colorArray[i]==undefined){
+            allSquares[i].style.backgroundColor="gray";
+        }else{
+            console.log("Something went wrong!");
+        }
+    }
+}
+
+let checkWrongPlace = function(guess){
+    currentWordArray.forEach(letter =>{
+        for (let i=0;i<currentWordArray.length;i++){
+            if (letter==guess[i]){
+                colorArray[i]="y";
+            }
+        }
+    });
+}
+let checkWin = function(element){
+    if (element=="g"){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+let gradeGuess = function(guess){
+    colorArray=[];
+    checkWrongPlace(guess);
+    checkExactPlace(guess);
+    changeBackgroundColors();
+    let win = colorArray.every(checkWin);
+    //winner is logged to console
+    console.log(win);
 }
 
 let submitRow = function (){
@@ -69,7 +88,7 @@ let submitRow = function (){
     if (!currentRow<gridSize){
         currentRow++;
     }
-    gradeGuess();
+    gradeGuess(guess);
     currentSquare=0;
 }
 
@@ -119,14 +138,22 @@ let addKeyPressListener = function (){
     })
 }
 
+let generateNewWord = function (){
+    //generate a new word here using random
+    currentWord="earth";
+    currentWordArray=currentWord.toUpperCase().split("");
+}
+
 const gameContainer = document.querySelector('.game-space');
 let gridSize=5;
 let currentRow=0;
 let currentSquare=0;
-let currentWord="earth";
-let currentWordArray=currentWord.toUpperCase().split("");
 let allSquares;
+let colorArray=[];
 drawGrid(gameContainer,gridSize);
 const allRows=document.querySelectorAll('.row');
-addSquareListeners(gameContainer);
+let currentWord;
+let currentWordArray;
+//Start of game
+generateNewWord();
 addKeyPressListener();
